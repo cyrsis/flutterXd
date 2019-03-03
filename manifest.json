@@ -1,0 +1,47 @@
+{
+  "name": "Flutterxd",
+  "id": "bb7d71ec",
+  "version": "1.0.3",
+  "description": "Export design spec to measure positions, copy css and export icons. Make writing CSS and UI fun.",
+  "icons": [
+    {
+      "width": 96,
+      "height": 96,
+      "path": "assets/logo.png"
+    },
+    {
+      "width": 128,
+      "height": 128,
+      "path": "assets/logo_128.png"
+    },
+    {
+      "width": 512,
+      "height": 512,
+      "path": "assets/logo_512.png"
+    }
+  ],
+  "host": {
+    "app": "XD",
+    "minVersion": "13.0.0"
+  },
+  "uiEntryPoints": [
+    {
+      "type": "menu",
+      "label": {
+        "default": "FlutterXD",
+        "zh": "FlutterXD"
+      },
+      "menuItems": [
+        {
+          "type": "menu",
+          "label": {
+            "default": "Export Flutter Style Code",
+            "zh": "导出所有画板到本地"
+          },
+          "commandId": "copyflutter",
+          "shortcut": { "mac": "Cmd+Shift+K", "win": "Ctrl+Shift+K" }
+        }
+      ]
+    }
+  ]
+}
