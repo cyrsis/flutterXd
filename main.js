@@ -25,224 +25,92 @@
 
 var sg = require("scenegraph");
 var clipboard = require("clipboard");
-var color = require("./util");
+var color = require("./color");
+var creation = require("./creation");
+var textWidget = require("./text");
+var recetangleWidget = require("./rectangle");
 
-
-function Hexfix(str) {
-    var v, w;
-    v = parseInt(str, 16);	// in rrggbb
-    if (str.length == 3) {
-        // nybble colors - fix to hex colors
-        //  0x00000rgb              -> 0x000r0g0b
-        //  0x000r0g0b | 0x00r0g0b0 -> 0x00rrggbb
-        w = ((v & 0xF00) << 8) | ((v & 0x0F0) << 4) | (v & 0x00F);
-        v = w | (w << 4);
-    }
-    return v.toString(16).toUpperCase();
-}
-
-
-function createContainer(selection) {
-    for (let i = 0; i < 5; i++) {
-        let rectangle = new Rectangle();
-        rectangle.width = 30 * i;
-        rectangle.height = 20 * i;
-        rectangle.fill = new color("gray");
-        selection.insertionParent.addChild(rectangle);
-        rectangle.moveInParentCoordinates(50 * i, 50 * i);
-
-        let ellipse = new Ellipse();
-        ellipse.radiusX = 20 * i;
-        ellipse.radiusY = 20 * i;
-        ellipse.fill = new color("gray");
-        selection.insertionParent.addChild(ellipse);
-        ellipse.moveInParentCoordinates(100 * i, 200 * i);
-
-        let text = new Text();
-        text.text = `example text ${i}`
-        text.styleRanges = [
-            {
-                length: text.text.length,
-                fill: new color("gray"),
-                fontSize: 20
-            }
-        ];
-        selection.insertionParent.addChild(text);
-        text.moveInParentCoordinates(200 * i, 100 * i);
-    }
-}
-
-function styleToWeight(fontStyle) {
-    if (fontStyle.match(/\bBold\b/i)) {
-        return "bold";
-    } else if (fontStyle.match(/\bBlack\b/i) || fontStyle.match(/\bHeavy\b/i)) {  // TODO: "extra bold"? (move precedence higher if so)
-        return "w900";
-    } else if (fontStyle.match(/\bSemi[- ]?bold\b/i) || fontStyle.match(/\bDemi[- ]?bold\b/i)) {
-        return "w600";
-    } else if (fontStyle.match(/\bMedium\b/i)) {
-        return "w500";
-    } else if (fontStyle.match(/\bLight\b/i)) {
-        return "w300";
-    } else if (fontStyle.match(/\bUltra[- ]light\b/i)) {
-        return "w200";
-    } else {
-        return "normal";
-    }
-}
 
 function styleIsItalic(fontStyle) {
     return (fontStyle.match(/\bItalic\b/i) || fontStyle.match(/\bOblique\b/i));
 }
 
 
-
-
-function HexToColor( colorStr) {
-
-    console.log(colorStr);
-    colorStr = colorStr.split("#").join("");
-    colorStr = "FF" + Hexfix(colorStr);
-    console.log(colorStr);
-
-    var val = 0;
-    var len = colorStr.length;
-    for (var i = 0; i < len; i++) {
-         var hexDigit = colorStr.charCodeAt(i).toFixed(16);
-        if (hexDigit >= 48 && hexDigit <= 57) {
-            val += (hexDigit - 48) * (1 << (4 * (len - 1 - i)));
-        } else if (hexDigit >= 65 && hexDigit <= 70) {
-            // A..F
-            val += (hexDigit - 55) * (1 << (4 * (len - 1 - i)));
-        } else if (hexDigit >= 97 && hexDigit <= 102) {
-            // a..f
-            val += (hexDigit - 87) * (1 << (4 * (len - 1 - i)));
-        } else {
-            throw new Error("An error occurred when converting a color");
-        }
-    }
-
-    return "0x"+ val.toString(16).toUpperCase();
-}
-function colorToCSS(solidColor) {
-    if (solidColor.a !== 255) {
-        `rgba(${solidColor.r}, ${solidColor.g}, ${solidColor.b}, ${num(solidColor.a / 255)
-         
-            })`;
-    } else {
-        return solidColor.toHex();
-    }
-}
-
-function num(value) {
-    return Math.round(value * 100) / 100;
-}
-
-// TODO: omit "px" suffix from 0s
-
-function eq(num1, num2) {
-    return (Math.abs(num1 - num2) < 0.001);
-}
-
 function copyflutter(selection) {
+
+    var css = "";
     var node = selection.items[0];
     if (!node) {
         return;
     }
-    var css = "";
+    //*** Debug
+    console.log("The selected node is a: " + node.constructor.name);
+    console.log("Node has " + node.children.length + " children");
+
+    // Print out types of all child nodes (if any)
+    node.children.forEach(function (childNode, i) {
+        console.log("---- 1 LEVEL Child " + i + " is a " + childNode.constructor.name);
+        css += textWidget.isText(childNode);
+
+        childNode.children.forEach((element,i) => {
+                console.log(element);
+                console.log("-- 2 level Child " + i + " is a " + element.constructor.name);
+                css += textWidget.isText(element);
+            }
+        )
+
+    });
+
 
     // Size - for anything except point text
-    if (!(node instanceof sg.Text && !node.areaBox)) {
-        var bounds = node.localBounds;
-        // css += `width: ${num(bounds.width)}px;\n`;
-        // css += `height: ${num(bounds.height)}px;\n`;
-        css += `Container( 
-          width: ${num(bounds.width)},
-          height:${num(bounds.height)},
-      )`
-    }
+    // if (!(node instanceof sg.Text && !node.areaBox)) {
+    //     var bounds = node.localBounds;
+    //     // css += `width: ${num(bounds.width)}px;\n`;
+    //     // css += `height: ${num(bounds.height)}px;\n`;
+    //     css += `Container(
+    //       width: ${num(bounds.width)},
+    //       height:${num(bounds.height)},\n`
+    //
+    //
+    //     //     static get BorderRadius10BrightOrgangeGm => new BoxDecoration(
+    //     //         color: AppColors.BrightOrgangeGM,
+    //     //         borderRadius: new BorderRadius.circular(10.0),
+    //     // );
+    //     if (node.hasRoundedCorners) {
+    //         css += `decoration: new BoxDecoration( \n`;
+    //         css += color.isColor(node);  //color: AppColors.BrightOrgangeGM,
+    //         var corners = node.effectiveCornerRadii;
+    //         var tlbr = eq(corners.topLeft, corners.bottomRight);
+    //         var trbl = eq(corners.topRight, corners.bottomLeft);
+    //         if (tlbr && trbl) {
+    //             if (eq(corners.topLeft, corners.topRight)) {
+    //                 css += `borderRadius: BorderRadius.circular(${num(corners.topLeft)}),\n`;
+    //             } else {
+    //                 css += `border-radius: ${num(corners.topLeft)}px ${num(corners.topRight)}px;\n`;
+    //             }
+    //         } else {
+    //             css += `border-radius: ${num(corners.topLeft)}px ${num(corners.topRight)}px ${num(corners.bottomRight)}px ${num(corners.bottomLeft)}px;\n`;
+    //         }
+    //         css += `),`
+    //     }
+    //
+    //     css += `),\n`;
+    // }
 
-    // Corner metrics
-    if (node.hasRoundedCorners) {
-        var corners = node.effectiveCornerRadii;
-        var tlbr = eq(corners.topLeft, corners.bottomRight);
-        var trbl = eq(corners.topRight, corners.bottomLeft);
-        if (tlbr && trbl) {
-            if (eq(corners.topLeft, corners.topRight)) {
-                css += `border-radius: ${num(corners.topLeft)}px;\n`;
-            } else {
-                css += `border-radius: ${num(corners.topLeft)}px ${num(corners.topRight)}px;\n`;
-            }
-        } else {
-            css += `border-radius: ${num(corners.topLeft)}px ${num(corners.topRight)}px ${num(corners.bottomRight)}px ${num(corners.bottomLeft)}px;\n`;
-        }
-    }
+
+     css+=textWidget.isText(node);
+     //css+=recetangleWidget.isRectangle(node);
 
     // Text styles
-    if (node instanceof sg.Text) {
-        var textStyles = node.styleRanges[0];
-        // css += `font-size: ${num(textStyles.fontSize)}px;\n`;
-        // css += `font-weight: ${styleToWeight(textStyles.fontStyle)};\n`;
 
-
-        if (textStyles.fontFamily.includes(" ")) {
-            // css += `font-family: "${textStyles.fontFamily}";\n`;
-            css += `TextStyle(
-                fontSize: ${num(textStyles.fontSize)},
-                fontWeight: ${styleToWeight(textStyles.fontStyle)},
-                fontFamily: "${textStyles.fontFamily}",`
-        }
-        else {
-            css += `TextStyle(
-                fontSize: ${num(textStyles.fontSize)},
-                fontWeight: ${styleToWeight(textStyles.fontStyle)},
-                fontFamily: "${textStyles.fontFamily}",\n`
-            // css += `font-family: ${textStyles.fontFamily};\n`;
-        }
-
-        if (styleIsItalic(textStyles.fontStyle)) {
-            // css += `font-style: italic;\n`;
-            css += `fontStyle: FontStyle.italic,\n`;
-        }
-        if (textStyles.underline) {
-            // css += `text-decoration: underline,\n`;
-            css += 'decoration: TextDecoration.underline,\n';
-        }
-
-        if (textStyles.charSpacing !== 0) {
-            // css += `letter-spacing: ${num(textStyles.charSpacing / 1000)}em;\n`;
-            css += `letterSpacing: ${num(textStyles.charSpacing / 1000*16)},\n`;
-        }
-        if (node.lineSpacing !== 0) {
-            //To-do check out what is line spacing
-            // css += `line-height: ${num(node.lineSpacing)}px;\n`;
-        }
-        // css += `text-align: ${node.textAlign};\n`;
-    }
 
     // Fill
-    var hasBgBlur = (node.blur && node.blur.visible && node.blur.isBackgroundEffect);
-    var fillName = (node instanceof sg.Text) ? "color" : "background";
-    if (node.fill && node.fillEnabled && !hasBgBlur) {
-        var fill = node.fill;
-        if (fill instanceof sg.Color) {
-            // css += `${fillName}: ${colorToCSS(fill)};\n`;
-            css += `color: ${Colors.colorToFlutter(fill)};,\n`;
-        } else if (fill.colorStops) {
-            var stops = fill.colorStops.map(stop => {
-                return colorToCSS(stop.color) + " " + num(stop.stop * 100) + "%";
-            });
-            css += `${fillName}: linear-gradient(${ stops.join(", ") });\n`;  // TODO: gradient direction!
-        } else if (fill instanceof sg.ImageFill) {
-            css += `/* background: url(...); */\n`;
-        }
-    } else {
-        // css += `${fillName}: transparent;\n`; //background transparent
-    }
+
 
     // Stroke
     if (node.stroke && node.strokeEnabled) {
         var stroke = node.stroke;
-        css += `border: ${num(node.strokeWidth)}px solid ${colorToCSS(stroke)};\n`;
+        css += `border: ${num(node.strokeWidth)}px solid ${color.colorToCSS(stroke)};\n`;
         // TODO: dashed lines!
     }
 
@@ -254,7 +122,7 @@ function copyflutter(selection) {
     // Dropshadow
     if (node.shadow && node.shadow.visible) {
         var shadow = node.shadow;
-        var shadowSettings = `${num(shadow.x)}px ${num(shadow.y)}px ${num(shadow.blur)}px ${colorToCSS(shadow.color)}`;
+        var shadowSettings = `${num(shadow.x)}px ${num(shadow.y)}px ${num(shadow.blur)}px ${color.colorToCSS(shadow.color)}`;
         if (node instanceof sg.Text) {
             css += `text-shadow: ${shadowSettings};\n`;
         } else if (node instanceof sg.Rectangle) {
@@ -299,7 +167,16 @@ function copyflutter(selection) {
     console.log(css);
 }
 
+function num(value) {
+    return Math.round(value * 100) / 100;
+}
+
+// TODO: omit "px" suffix from 0s
+function eq(num1, num2) {
+    return (Math.abs(num1 - num2) < 0.001);
+}
+
 exports.commands = {
     copyflutter: copyflutter,
-    createContainer: createContainer,
+    createContainer: creation.createContainer,
 };

@@ -27,3 +27,6 @@ function createContainer(selection) {
         text.moveInParentCoordinates(200 * i, 100 * i);
     }
 }
+
+module.exports = {
+    createContainer};
