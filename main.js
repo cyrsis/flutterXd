@@ -29,6 +29,8 @@ var color = require("./color");
 var creation = require("./creation");
 var textWidget = require("./text");
 var recetangleWidget = require("./rectangle");
+var ellipse = require("./ellipse");
+var path = require('./path');
 
 
 function styleIsItalic(fontStyle) {
@@ -49,88 +51,42 @@ function copyflutter(selection) {
 
     // Print out types of all child nodes (if any)
     node.children.forEach(function (childNode, i) {
-        console.log("---- 1 LEVEL Child " + i + " is a " + childNode.constructor.name);
+        console.log("**** 1 LEVEL Child " + i + " is a " + childNode.constructor.name);
         css += textWidget.isText(childNode);
 
-        childNode.children.forEach((element,i) => {
+        childNode.children.forEach((element, i) => {
                 console.log(element);
-                console.log("-- 2 level Child " + i + " is a " + element.constructor.name);
-                css += textWidget.isText(element);
+                console.log("----> 2 level Child " + i + " is a " + element.constructor.name);
+                css += textWidget.isText(element) + `,  `;
             }
         )
 
     });
 
 
-    // Size - for anything except point text
-    // if (!(node instanceof sg.Text && !node.areaBox)) {
-    //     var bounds = node.localBounds;
-    //     // css += `width: ${num(bounds.width)}px;\n`;
-    //     // css += `height: ${num(bounds.height)}px;\n`;
-    //     css += `Container(
-    //       width: ${num(bounds.width)},
-    //       height:${num(bounds.height)},\n`
-    //
-    //
-    //     //     static get BorderRadius10BrightOrgangeGm => new BoxDecoration(
-    //     //         color: AppColors.BrightOrgangeGM,
-    //     //         borderRadius: new BorderRadius.circular(10.0),
-    //     // );
-    //     if (node.hasRoundedCorners) {
-    //         css += `decoration: new BoxDecoration( \n`;
-    //         css += color.isColor(node);  //color: AppColors.BrightOrgangeGM,
-    //         var corners = node.effectiveCornerRadii;
-    //         var tlbr = eq(corners.topLeft, corners.bottomRight);
-    //         var trbl = eq(corners.topRight, corners.bottomLeft);
-    //         if (tlbr && trbl) {
-    //             if (eq(corners.topLeft, corners.topRight)) {
-    //                 css += `borderRadius: BorderRadius.circular(${num(corners.topLeft)}),\n`;
-    //             } else {
-    //                 css += `border-radius: ${num(corners.topLeft)}px ${num(corners.topRight)}px;\n`;
-    //             }
-    //         } else {
-    //             css += `border-radius: ${num(corners.topLeft)}px ${num(corners.topRight)}px ${num(corners.bottomRight)}px ${num(corners.bottomLeft)}px;\n`;
-    //         }
-    //         css += `),`
-    //     }
-    //
-    //     css += `),\n`;
-    // }
-
-
-     css+=textWidget.isText(node);
-     //css+=recetangleWidget.isRectangle(node);
-
+    css += textWidget.isText(node);
+    css += recetangleWidget.isRectangle(node);
+    css += ellipse.isEllipse(node);
+    css += path.isPath(node);
     // Text styles
 
 
     // Fill
 
 
-    // Stroke
-    if (node.stroke && node.strokeEnabled) {
-        var stroke = node.stroke;
-        css += `border: ${num(node.strokeWidth)}px solid ${color.colorToCSS(stroke)};\n`;
-        // TODO: dashed lines!
-    }
+    // // Stroke
+    // if (node.stroke && node.strokeEnabled) {
+    //     var stroke = node.stroke;
+    //     css += `border: ${num(node.strokeWidth)}px solid ${color.colorToCSS(stroke)};\n`;
+    //     // TODO: dashed lines!
+    // }
 
     // Opacity
     if (node.opacity !== 1) {
-        css += `opacity: ${num(node.opacity)};\n`;
+        css = `new Opacity(
+          opacity: ${num(node.opacity)}, child:` + css + ',)';
     }
 
-    // Dropshadow
-    if (node.shadow && node.shadow.visible) {
-        var shadow = node.shadow;
-        var shadowSettings = `${num(shadow.x)}px ${num(shadow.y)}px ${num(shadow.blur)}px ${color.colorToCSS(shadow.color)}`;
-        if (node instanceof sg.Text) {
-            css += `text-shadow: ${shadowSettings};\n`;
-        } else if (node instanceof sg.Rectangle) {
-            css += `box-shadow: ${shadowSettings};\n`;
-        } else {
-            css += `filter: drop-shadow(${shadowSettings});\n`;
-        }
-    }
 
     // Blur
     if (node.blur && node.blur.visible) {

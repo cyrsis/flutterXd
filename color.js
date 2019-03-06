@@ -2,7 +2,8 @@ var sg = require("scenegraph");
 
 function colorToFlutter(solidColor) {
     if (solidColor.a !== 255) {
-        return `rgba(${solidColor.r}, ${solidColor.g}, ${solidColor.b}, ${num(solidColor.a / 255)})`;
+        //return `rgba(${solidColor.r}, ${solidColor.g}, ${solidColor.b}, ${num(solidColor.a / 255)})`;
+        return HexToColor(solidColor.toHex());
     } else {
         // return solidColor.toHex();
         return HexToColor(solidColor.toHex());
@@ -11,10 +12,11 @@ function colorToFlutter(solidColor) {
 
 function HexToColor(colorStr) {
 
-    // console.log(colorStr);
+     console.log("before"+colorStr);
     colorStr = colorStr.split("#").join("");
     colorStr = "FF" + Hexfix(colorStr);
-    // console.log(colorStr);
+    var fix = Hexfix(colorStr);
+     console.log("after"+fix);
 
     var val = 0;
     var len = colorStr.length;
@@ -33,7 +35,8 @@ function HexToColor(colorStr) {
         }
     }
 
-    return "0x" + val.toString(16).toUpperCase();
+    // return "0x" + val.toString(16).toUpperCase();
+    return "0x" +fix;
 }
 
 function Hexfix(str) {
@@ -71,15 +74,33 @@ function isColor(node)
         var fill = node.fill;
         if (fill instanceof sg.Color) {
             // css += `${fillName}: ${colorToCSS(fill)};\n`;
+            console.log(colorToFlutter(fill));
             css += `color: Color(${colorToFlutter(fill)}),\n`;
-        } else if (fill.colorStops) {
+        } else if (node.fill.colorStops) {
             var stops = fill.colorStops.map(stop => {
                 return colorToCSS(stop.color) + " " + num(stop.stop * 100) + "%";
             });
-            css += `${fillName}: linear-gradient(${ stops.join(", ") });\n`;  // TODO: gradient direction!
+            // css+=stops;
+
+            var linearStops = fill.colorStops.map(
+                stops =>{
+                    return num(stops.stop)
+                }
+            )
+            var linearGradientColor = fill.colorStops.map( colors =>{
+                  return 'Color('+"somethinbg"+colorToFlutter(colors.color)+`)`
+                }
+
+            );
+            css += `gradient: new LinearGradient(colors: [${ linearGradientColor.join(", ") }],
+            stops:[${ linearStops.join(", ") }],
+            begin: FractionalOffset( ${node.fill.startX},${node.fill.startY}),
+            end: FractionalOffset( ${node.fill.endX},${node.fill.endY}),
+            ),\n`;  // TODO: gradient direction!
         }
         else if (fill instanceof sg.ImageFill) {
-            css += `/* background: url(...); */\n`;
+            css += `image:new DecorationImage(
+                        image: NetworkImage("https://images.unsplash.com/photo-1537815749002-de6a533c64db?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=845&q=80"),fit: BoxFit.cover`+`),`;
         }
     } else {
         // css += `${fillName}: transparent;\n`; //background transparent

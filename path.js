@@ -1,27 +1,76 @@
+const application = require("application");
+const fs = require("uxp").storage.localFileSystem;
 var sg = require("scenegraph");
 var color = require("./color");
 
-function isRectangle(node) {
+function isPath(node) {
 
-    var css = '';
-    if (node instanceof sg.Rectangle) {
 
+    if (node instanceof sg.Path) {
         var colors = "";
+        var css ="";
+        var filename = `${node.name}path.svg`.toLowerCase();
 
+        console.log(node);
+
+        saveSvg(node).then(function (val){
+        });
 
         var bounds = node.localBounds;
-        css = `new Container( 
+
+        css += `new SvgPicture.asset(
+          'assets/svg/${filename}',
+          ${color.isColor(node)}
           width: ${num(bounds.width)},
           height:${num(bounds.height)},
-          ${hasColor(node)}
-          child:` + css + ` new Container()` + `)`;
-        // return css;
+          allowDrawingOutsideViewBox: true,
+          ),
+          //- assets/svg/${filename}
+      
+          `;
+
+        // console.log("css"+css);
+         return css;
+
         /**/
     }
 
 
-    return css;
+    return "";
     // }
+}
+
+async function saveSvg(node) {
+    const folder = await fs.getFolder();
+    // Exit if user doesn't select a folder
+    if (!folder) return console.log("User canceled folder picker.");
+
+    var filename = `${node.name}path.svg`.toLowerCase();
+    const file = await folder.createFile(filename, {overwrite: true});
+
+    const renditionOptions = [
+        {
+            node: node,
+            outputFile: file,
+            type: application.RenditionType.SVG,
+            minify: true,
+            embedImages: true,
+            background: false,
+            scale: 1
+        }
+    ];
+
+
+    // Create the rendition(s)
+    await application.createRenditions(renditionOptions);
+    var regex = /((<style>)|(<style type=.+))((\s+)|(\S+)|(\r+)|(\n+))(.+)((\s+)|(\S+)|(\r+)|(\n+))(<\/style>)/g;
+    var subst = ``;
+    const markup = await file.read();
+    // console.log(markup);
+    const svgCode = markup.replace(regex,subst);
+    // console.log(svgCode);
+    await file.write(svgCode);
+
 }
 
 function hasColor(node) {
@@ -41,7 +90,7 @@ function hasColor(node) {
 }
 
 function hasBorder(node) {
-    var css='';
+    var css = '';
     // Stroke
     if (node.stroke && node.strokeEnabled) {
         css += `border: `;
@@ -79,9 +128,11 @@ function hasShadow(node) {
             css += `filter: drop-shadow(${shadowSettings});\n`;
         }
         css += `]`;
-    }
 
-    return css //Closing
+        return css
+    }
+    return css
+     //Closing
 }
 
 function hasRadius(node) {
@@ -114,5 +165,5 @@ function eq(num1, num2) {
 }
 
 module.exports = {
-    isRectangle
+    isPath
 };

@@ -55,17 +55,17 @@ function isText(node) {
 
     if ((node instanceof sg.Text && node.areaBox)) {
         var bounds = node.localBounds;
-        css = `Container( 
+        css = `new Container( 
           width: ${num(bounds.width)},
           height:${num(bounds.height)},
           child:` + css + `)`;
-        return css;
+        return css +`\n`;
     } else {
         return css
     }
 
 
-    return css + `some\n\n`;
+    return css + ``;
 }
 
 
@@ -73,17 +73,17 @@ function styleToWeight(fontStyle) {
     if (fontStyle.match(/\bBold\b/i)) {
         return "FontWeight.bold";
     } else if (fontStyle.match(/\bBlack\b/i) || fontStyle.match(/\bHeavy\b/i)) {  // TODO: "extra bold"? (move precedence higher if so)
-        return "FontWeight.w700";
-    } else if (fontStyle.match(/\bSemi[- ]?bold\b/i) || fontStyle.match(/\bDemi[- ]?bold\b/i)) {
         return "FontWeight.w600";
-    } else if (fontStyle.match(/\bMedium\b/i)) {
+    } else if (fontStyle.match(/\bSemi[- ]?bold\b/i) || fontStyle.match(/\bDemi[- ]?bold\b/i)) {
         return "FontWeight.w500";
+    } else if (fontStyle.match(/\bMedium\b/i)) {
+        return "FontWeight.w400";
     } else if (fontStyle.match(/\bLight\b/i)) {
         return "FontWeight.w300";
     } else if (fontStyle.match(/\bUltra[- ]light\b/i)) {
         return "FontWeight.w200";
     } else {
-        return "FontWeight.w200";
+        return "FontWeight.w400";
     }
 }
 
