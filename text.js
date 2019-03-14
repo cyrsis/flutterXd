@@ -50,6 +50,8 @@ function isText(node) {
 
         css += `),)`;
 
+        // css += color.checkOpacity(node,css);
+
     }
 
 
@@ -63,6 +65,7 @@ function isText(node) {
     } else {
         return css
     }
+
 
 
     return css + ``;

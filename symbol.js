@@ -1,22 +1,29 @@
 var sg = require("scenegraph");
 var color = require("./color");
+const application = require("application");
+const commands = require('commands');
+const fs = require("uxp").storage.localFileSystem;
 
-function isRectangle(node) {
+function isSymbol(node) {
 
-    console.log("Selected Rectangle: "+node);
+    console.log("Selected Symbol: "+node);
+    console.log('***Got Call');
 
     var css = '';
-    if (node instanceof sg.Rectangle) {
+    if (node instanceof sg.SymbolInstance) {
 
         var colors = "";
-
+        var filename = `${node.name}.png`.toLowerCase();
+        savePngOnTemp(node);
         var bounds = node.localBounds;
         css = `new Container( 
           width: ${num(bounds.width)},
           height:${num(bounds.height)},
-          ${hasColor(node)}
+          decoration: new BoxDecoration(
+          image:new DecorationImage(
+                        image: NetworkImage("http://localhost:8899/image/${filename}"),fit: BoxFit.cover` + `),
           child:` + css + ` new Container()` + `)`;
-        // return css;
+         return css;
         /**/
     }
 
@@ -105,6 +112,62 @@ function hasRadius(node) {
     return css;
 }
 
+async function savePngOnTemp(node) {
+
+
+    const folder = await fs.getTemporaryFolder();
+    // Exit if user doesn't select a folder
+    //  if (!folder) return console.log("User canceled folder picker.");
+
+    // console.log("folder" + folder);
+    var filename = `${node.name}.png`.toLowerCase();
+    console.log("***filename****" + filename);
+    var myfile = await folder.createFile(filename, {overwrite: true});
+
+
+    // console.log("***folder"+folder);
+    // var something = await folder.getEntries();
+    // something.forEach(entry => console.log(entry.name));
+
+    const renditionOptions = [
+        {
+            node: node,
+            outputFile: myfile,
+            type: application.RenditionType.PNG,    // [3]
+            scale: 2
+        }
+    ];
+
+
+    // Create the rendition(s)
+    await application.createRenditions(renditionOptions)    // [1]
+        .then(results => {                             // [2]
+            // console.log(`PNG rendition has been saved at ${results[0].outputFile.nativePath}`);
+        })
+        .catch(error => {                              // [3]
+            // console.log(error);
+        });
+
+    //Clean up from the text file
+    // var regex = /((<style>)|(<style type=.+))((\s+)|(\S+)|(\r+)|(\n+))(.+)((\s+)|(\S+)|(\r+)|(\n+))(<\/style>)/g;
+    // var subst = ``;
+    // const somethingelse = await filename.read();
+    //
+    // console.log("Something else"+somethingelse);
+
+    // const adata = myfile.read({format: formats.binary}).then(function () {
+    //     console.log("File is " + adata.byteLength + " bytes long.")
+    // }); // 'data' is an ArrayBuffer
+
+
+    // sendPngWebsocket(myfile,filename);
+    // // console.log(markup);
+    // const svgCode = markup.replace(regex, subst);
+    // // console.log(svgCode);
+    // await file.write(svgCode);
+
+
+}
 
 function num(value) {
     return Math.round(value * 100) / 100;
@@ -115,5 +178,5 @@ function eq(num1, num2) {
 }
 
 module.exports = {
-    isRectangle
+    isSymbol
 };

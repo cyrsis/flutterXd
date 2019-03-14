@@ -8,29 +8,40 @@ function isPath(node) {
 
     if (node instanceof sg.Path) {
         var colors = "";
-        var css ="";
-        var filename = `${node.name}path.svg`.toLowerCase();
+        var css = "";
+        var filename = `${node.name}path.svg`.toLowerCase().replace(/ /g,'');
 
         console.log(node);
 
-        saveSvg(node).then(function (val){
+        saveSvg(node).then(function (val) {
         });
 
         var bounds = node.localBounds;
 
-        css += `new SvgPicture.asset(
-          'assets/svg/${filename}',
+        // css += `new SvgPicture.network(
+        //   'http://localhost:8899/image/${filename}',
+        //   ${color.isColor(node)}
+        //   width: ${num(bounds.width)},
+        //   height:${num(bounds.height)},
+        //   allowDrawingOutsideViewBox: true,
+        //   ),
+        //
+        //
+        //   `;
+        css += `new SvgPicture.network(
+          'http://localhost:8899/image/${filename}',
           ${color.isColor(node)}
           width: ${num(bounds.width)},
           height:${num(bounds.height)},
           allowDrawingOutsideViewBox: true,
           ),
-          //- assets/svg/${filename}
+          
       
           `;
 
+
         // console.log("css"+css);
-         return css;
+        return css;
 
         /**/
     }
@@ -41,11 +52,11 @@ function isPath(node) {
 }
 
 async function saveSvg(node) {
-    const folder = await fs.getFolder();
+    const folder = await fs.getTemporaryFolder();
     // Exit if user doesn't select a folder
-    if (!folder) return console.log("User canceled folder picker.");
+    // if (!folder) return console.log("User canceled folder picker.");
 
-    var filename = `${node.name}path.svg`.toLowerCase();
+    var filename = `${node.name}path.svg`.toLowerCase().replace(/ /g,'');
     const file = await folder.createFile(filename, {overwrite: true});
 
     const renditionOptions = [
@@ -56,7 +67,7 @@ async function saveSvg(node) {
             minify: true,
             embedImages: true,
             background: false,
-            scale: 1
+            scale: 2
         }
     ];
 
@@ -67,7 +78,7 @@ async function saveSvg(node) {
     var subst = ``;
     const markup = await file.read();
     // console.log(markup);
-    const svgCode = markup.replace(regex,subst);
+    const svgCode = markup.replace(regex, subst);
     // console.log(svgCode);
     await file.write(svgCode);
 
@@ -132,7 +143,7 @@ function hasShadow(node) {
         return css
     }
     return css
-     //Closing
+    //Closing
 }
 
 function hasRadius(node) {

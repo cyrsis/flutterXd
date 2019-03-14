@@ -31,6 +31,7 @@ var textWidget = require("./text");
 var recetangleWidget = require("./rectangle");
 var ellipse = require("./ellipse");
 var path = require('./path');
+var symbol = require('./symbol');
 
 
 function styleIsItalic(fontStyle) {
@@ -49,46 +50,80 @@ function copyflutter(selection) {
     console.log("The selected node is a: " + node.constructor.name);
     console.log("Node has " + node.children.length + " children");
 
+    if (node instanceof  sg.SymbolInstance) {
+        css+=symbol.isSymbol(node);
+        clipboard.copyText(css);
+        console.log(css);
+        return;
+    }
+
     // Print out types of all child nodes (if any)
     node.children.forEach(function (childNode, i) {
-        console.log("**** 1 LEVEL Child " + i + " is a " + childNode.constructor.name);
-        css += textWidget.isText(childNode);
-
-        childNode.children.forEach((element, i) => {
-                console.log(element);
-                console.log("----> 2 level Child " + i + " is a " + element.constructor.name);
-                css += textWidget.isText(element) + `,  `;
+            console.log("**** 1 LEVEL Child " + i + " is a " + childNode.constructor.name);
+            if (childNode instanceof sg.Text) {
+                css += textWidget.isText(childNode) + `,  `;
             }
-        )
+            else if (childNode instanceof sg.Rectangle) {
+                css += recetangleWidget.isRectangle(childNode) + ', ';
+            }
+            else if (childNode instanceof sg.Ellipse) {
+                css += ellipse.isEllipse(childNode) + ', ';
+            }
+            else if (childNode instanceof sg.Path) {
+                css += path.isPath(childNode) + ', ';
+            }
 
-    });
+
+            childNode.children.forEach((element, i) => {
+                    console.log(element);
+                    console.log("----> 2 level Child " + i + " is a " + element.constructor.name);
+                    if (element instanceof sg.Text) {
+                        css += textWidget.isText(element) + `,  `;
+                    }
+                    else if (element instanceof sg.Rectangle) {
+                        css += recetangleWidget.isRectangle(element) + ', ';
+                    }
+                    else if (childNode instanceof sg.Ellipse) {
+                        css += ellipse.isEllipse(element) + ', ';
+                    }
+                    else if (childNode instanceof sg.Path) {
+                        css += path.isPath(element) + ', ';
+                    }
+                }
+            )
+
+        }
+    )
+    ;
+
+
 
 
     css += textWidget.isText(node);
     css += recetangleWidget.isRectangle(node);
     css += ellipse.isEllipse(node);
     css += path.isPath(node);
-    // Text styles
+// Text styles
 
 
-    // Fill
+// Fill
 
 
-    // // Stroke
-    // if (node.stroke && node.strokeEnabled) {
-    //     var stroke = node.stroke;
-    //     css += `border: ${num(node.strokeWidth)}px solid ${color.colorToCSS(stroke)};\n`;
-    //     // TODO: dashed lines!
-    // }
+// // Stroke
+// if (node.stroke && node.strokeEnabled) {
+//     var stroke = node.stroke;
+//     css += `border: ${num(node.strokeWidth)}px solid ${color.colorToCSS(stroke)};\n`;
+//     // TODO: dashed lines!
+// }
 
-    // Opacity
+// Opacity
     if (node.opacity !== 1) {
         css = `new Opacity(
-          opacity: ${num(node.opacity)}, child:` + css + ',)';
+          opacity: ${num(node.opacity)}, child:` + css + ')';
     }
 
 
-    // Blur
+// Blur
     if (node.blur && node.blur.visible) {
         var blur = node.blur;
         if (blur.isBackgroundEffect) {
