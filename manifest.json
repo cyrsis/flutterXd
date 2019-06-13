@@ -39,7 +39,7 @@
             "zh": "导出所有画板到本地"
           },
           "commandId": "copyflutter",
-          "shortcut": { "mac": "Cmd+Shift+K", "win": "Ctrl+Shift+K" }
+          "shortcut": { "mac": "Cmd+Opt+K", "win": "Ctrl+Alt+K" }
         }
       ]
     }

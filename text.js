@@ -75,17 +75,40 @@ function isText(node) {
 function styleToWeight(fontStyle) {
     if (fontStyle.match(/\bBold\b/i)) {
         return "FontWeight.bold";
-    } else if (fontStyle.match(/\bBlack\b/i) || fontStyle.match(/\bHeavy\b/i)) {  // TODO: "extra bold"? (move precedence higher if so)
+    }
+    else if (fontStyle.match(/\bBlack\b/i)) {
+        return "FontWeight.w900";
+    }
+    else if (fontStyle.match(/\bExtra[- ]?bold\b/i)) {
+        return "FontWeight.w800";
+    }
+    else if (fontStyle.match(/\bBold\b/i)) {
+        return "FontWeight.w700";
+    }
+
+    else if (fontStyle.match(/\bHeavy\b/i)) {
         return "FontWeight.w600";
-    } else if (fontStyle.match(/\bSemi[- ]?bold\b/i) || fontStyle.match(/\bDemi[- ]?bold\b/i)) {
+    }
+    else if (fontStyle.match(/\bSemi[- ]?bold\b/i) || fontStyle.match(/\bDemi[- ]?bold\b/i)) {
+        return "FontWeight.w600";
+    }
+    else if (fontStyle.match(/\bMedium\b/i)) {
         return "FontWeight.w500";
-    } else if (fontStyle.match(/\bMedium\b/i)) {
-        return "FontWeight.w400";
-    } else if (fontStyle.match(/\bLight\b/i)) {
+    }
+    else if (fontStyle.match(/\bLight\b/i)) {
         return "FontWeight.w300";
-    } else if (fontStyle.match(/\bUltra[- ]light\b/i)) {
+    }
+
+    else if (fontStyle.match(/\bExtra[- ]light\b/i)) {
+            return "FontWeight.w200";
+        }
+    else if (fontStyle.match(/\bUltra[- ]light\b/i)) {
         return "FontWeight.w200";
-    } else {
+    }
+    else if (fontStyle.match(/\bThin\b/i)) {
+        return "FontWeight.w100";
+    }
+    else {
         return "FontWeight.w400";
     }
 }
