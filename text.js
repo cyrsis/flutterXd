@@ -11,17 +11,22 @@ function isText(node) {
         // css += `font-size: ${num(textStyles.fontSize)}px;\n`;
         // css += `font-weight: ${styleToWeight(textStyles.fontStyle)};\n`;
 
+        var textAlign = '';
         var plaintext = node.text;
+        //css += `text-align: ${node.textAlign};\n`;
+        if (node.textAlign){
+         textAlign = `textAlign: TextAlign.${node.textAlign},\n`;
+        }
 
         if (textStyles.fontFamily.includes(" ")) {
             // css += `font-family: "${textStyles.fontFamily}";\n`;
-            css += `new Text("${plaintext}", style: new TextStyle(
+            css += `new Text('''${plaintext}''', ${textAlign} style: new TextStyle(
                 fontSize: ${num(textStyles.fontSize)},
                 fontWeight: ${styleToWeight(textStyles.fontStyle)},
                 fontFamily: "${textStyles.fontFamily}",`
         }
         else {
-            css += `new Text( "${plaintext}", style: TextStyle(
+            css += `new Text( '''${plaintext}''', ${textAlign} style: TextStyle(
                 fontSize: ${num(textStyles.fontSize)},
                 fontWeight: ${styleToWeight(textStyles.fontStyle)},
                 fontFamily: "${textStyles.fontFamily}",\n`
@@ -45,7 +50,7 @@ function isText(node) {
             //To-do check out what is line spacing
             // css += `line-height: ${num(node.lineSpacing)}px;\n`;
         }
-        // css += `text-align: ${node.textAlign};\n`;
+
         css += color.isColor(node);
 
         css += `),)`;

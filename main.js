@@ -38,20 +38,121 @@ function styleIsItalic(fontStyle) {
     return (fontStyle.match(/\bItalic\b/i) || fontStyle.match(/\bOblique\b/i));
 }
 
-
-function copyflutter(selection) {
+function copyColor(selection) {
 
     var css = "";
     var node = selection.items[0];
     if (!node) {
         return;
     }
+
+    css += color.isColor(node);
+
+
+    clipboard.copyText(css);
+    console.log(css);
+
+
+}
+
+function copyflutter(selection) {
+
+    var css = "";
+    var containerCss = "";
+    var childCss = "";
+    var groupCss = "";
+    var node = selection.items[0];
+    if (!node) {
+        return;
+    }
     //*** Debug
+    console.log("================================================");
     console.log("The selected node is a: " + node.constructor.name);
     console.log("Node has " + node.children.length + " children");
+    console.log("================================================");
 
-    if (node instanceof  sg.SymbolInstance) {
-        css+=symbol.isSymbol(node);
+    if (node instanceof sg.Artboard) {
+        // Print out types of all child nodes (if any)
+        node.children.forEach(function (childNode, i) {
+            console.log("Child " + i + " is a " + childNode.constructor.name);
+        });
+        return;
+    }
+
+    if (node instanceof sg.Group) {
+        // Print out types of all child nodes (if any)
+
+        var element = node.children.toArray();
+
+        var reversed = element.reverse();
+
+        walkDownTree(node);
+
+        function walkDownTree(node, command, value = null) {
+            // command(node, value);
+
+            var bounds = node.localBounds;
+            groupCss += "//";
+            groupCss += `${node.name}`
+            groupCss += "\n";
+            groupCss += `new Container(
+          width: ${num(bounds.width)},
+          height:${num(bounds.height)},
+          child: Column(
+        children: <Widget>[`;
+
+            node.children.forEach(function (childNode, i) {
+                console.log("Child " + i + " is a " + childNode.constructor.name);
+                if (childNode instanceof sg.Rectangle) {
+                    groupCss += recetangleWidget.isRectangle(childNode)
+                    groupCss += `)`
+                    ;
+                } else if (childNode instanceof sg.Text) {
+                    groupCss += textWidget.isText(childNode) + ', ';
+                }
+
+
+            });
+
+            groupCss += `], 
+      ),
+      )`;
+            //Do not go for the second child
+            // node.children.forEach(childNode => {
+            //     walkDownTree(childNode, command, value);
+            // });
+        }
+
+        // reversed.forEach(function (childNode, i) {
+        //     console.log("Child " + i + " is a " + childNode.constructor.name);
+        //     if (childNode instanceof sg.Rectangle) {
+        //         groupCss += recetangleWidget.isRectangle(childNode)
+        //         groupCss += `)`
+        //         ;
+        //     } else if (childNode instanceof sg.Text) {
+        //         groupCss += textWidget.isText(childNode) + ', ';
+        //     }
+        //
+        //
+        // });
+
+        // css += groupCss + containerCss + childCss;
+
+
+        groupCss += `, 
+      ),
+      )`;//groupCss
+
+
+        clipboard.copyText(groupCss);
+        console.log(groupCss);
+
+        return;
+    }
+
+
+    if (node instanceof sg.SymbolInstance) {
+        css += symbol.isSymbol(node);
         clipboard.copyText(css);
         console.log(css);
         return;
@@ -62,14 +163,11 @@ function copyflutter(selection) {
             console.log("**** 1 LEVEL Child " + i + " is a " + childNode.constructor.name);
             if (childNode instanceof sg.Text) {
                 css += textWidget.isText(childNode) + `,  `;
-            }
-            else if (childNode instanceof sg.Rectangle) {
+            } else if (childNode instanceof sg.Rectangle) {
                 css += recetangleWidget.isRectangle(childNode) + ', ';
-            }
-            else if (childNode instanceof sg.Ellipse) {
+            } else if (childNode instanceof sg.Ellipse) {
                 css += ellipse.isEllipse(childNode) + ', ';
-            }
-            else if (childNode instanceof sg.Path) {
+            } else if (childNode instanceof sg.Path) {
                 css += path.isPath(childNode) + ', ';
             }
 
@@ -79,14 +177,11 @@ function copyflutter(selection) {
                     console.log("----> 2 level Child " + i + " is a " + element.constructor.name);
                     if (element instanceof sg.Text) {
                         css += textWidget.isText(element) + `,  `;
-                    }
-                    else if (element instanceof sg.Rectangle) {
+                    } else if (element instanceof sg.Rectangle) {
                         css += recetangleWidget.isRectangle(element) + ', ';
-                    }
-                    else if (childNode instanceof sg.Ellipse) {
+                    } else if (childNode instanceof sg.Ellipse) {
                         css += ellipse.isEllipse(element) + ', ';
-                    }
-                    else if (childNode instanceof sg.Path) {
+                    } else if (childNode instanceof sg.Path) {
                         css += path.isPath(element) + ', ';
                     }
                 }
@@ -95,8 +190,6 @@ function copyflutter(selection) {
         }
     )
     ;
-
-
 
 
     css += textWidget.isText(node);
@@ -169,5 +262,6 @@ function eq(num1, num2) {
 
 exports.commands = {
     copyflutter: copyflutter,
+    copyColor: copyColor,
     createContainer: creation.createContainer,
 };

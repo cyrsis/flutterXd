@@ -6,16 +6,19 @@ function isRectangle(node) {
     console.log("Selected Rectangle: "+node);
 
     var css = '';
+    var childrencss = ` new Container()`;
     if (node instanceof sg.Rectangle) {
 
         var colors = "";
-
         var bounds = node.localBounds;
-        css = `new Container( 
+        css += "//";
+        css += `${node.name}`
+        css += "\n";
+        css += `new Container( 
           width: ${num(bounds.width)},
           height:${num(bounds.height)},
           ${hasColor(node)}
-          child:` + css + ` new Container()` + `)`;
+          child:` +childrencss ;
         // return css;
         /**/
     }
@@ -39,6 +42,8 @@ function hasColor(node) {
 
         //     color: Color(0xFFFF7B6E),
     }
+
+
 }
 
 function hasBorder(node) {

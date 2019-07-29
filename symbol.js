@@ -7,8 +7,6 @@ const fs = require("uxp").storage.localFileSystem;
 function isSymbol(node) {
 
     console.log("Selected Symbol: "+node);
-    console.log('***Got Call');
-
     var css = '';
     if (node instanceof sg.SymbolInstance) {
 
@@ -16,7 +14,8 @@ function isSymbol(node) {
         var filename = `${node.name}.png`.toLowerCase();
         savePngOnTemp(node);
         var bounds = node.localBounds;
-        css = `new Container( 
+
+        css += `new Container( 
           width: ${num(bounds.width)},
           height:${num(bounds.height)},
           decoration: new BoxDecoration(

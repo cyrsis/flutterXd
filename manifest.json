@@ -40,6 +40,15 @@
           },
           "commandId": "copyflutter",
           "shortcut": { "mac": "Cmd+Opt+K", "win": "Ctrl+Alt+K" }
+        },
+        {
+          "type": "menu",
+          "label": {
+            "default": "Export Flutter Color Code",
+            "zh": "导出 Color"
+          },
+          "commandId": "copyColor",
+          "shortcut": { "mac": "Cmd+Opt+P", "win": "Ctrl+Alt+P" }
         }
       ]
     }
