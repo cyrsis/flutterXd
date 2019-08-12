@@ -46,6 +46,7 @@ function copyColor(selection) {
         return;
     }
 
+
     css += color.isColor(node);
 
 
@@ -71,6 +72,8 @@ function copyflutter(selection) {
     console.log("Node has " + node.children.length + " children");
     console.log("================================================");
 
+    // console.log(node.pluginData);
+
     if (node instanceof sg.Artboard) {
         // Print out types of all child nodes (if any)
         node.children.forEach(function (childNode, i) {
@@ -86,12 +89,20 @@ function copyflutter(selection) {
 
         var reversed = element.reverse();
 
+
+
         walkDownTree(node);
 
         function walkDownTree(node, command, value = null) {
             // command(node, value);
 
             var bounds = node.localBounds;
+
+            var position = node.boundsInParent;
+
+            var  PreviousChildYPosition = 0;
+
+            console.log(position);
             groupCss += "//";
             groupCss += `${node.name}`
             groupCss += "\n";
@@ -101,14 +112,41 @@ function copyflutter(selection) {
           child: Column(
         children: <Widget>[`;
 
-            node.children.forEach(function (childNode, i) {
-                console.log("Child " + i + " is a " + childNode.constructor.name);
+            node.children.forEach(function (childNode, index) {
+
+                console.log("Current Child " + index + " is a " + childNode.constructor.name);
+
+                console.log("Previous: " + ((0 === index)? "START" : node.children.at(index-1)));
+
+                console.log("Next: " + ((childNode.length - 1 === index)? "END" : node.children.at(index+1)));
+
+
+
                 if (childNode instanceof sg.Rectangle) {
                     groupCss += recetangleWidget.isRectangle(childNode)
                     groupCss += `)`
                     ;
                 } else if (childNode instanceof sg.Text) {
+
+
+                    if (1 === index) {
+                        groupCss += `\nAppWidget.SizeBoxH`+childNode.boundsInParent.y+`,\n`;
+                    }
+                    else
+                    {
+
+                        groupCss += `\nAppWidget.SizeBoxH`+ (childNode.boundsInParent.y-PreviousChildYPosition)+`,\n`;
+
+                    }
+
                     groupCss += textWidget.isText(childNode) + ', ';
+
+                    console.log("Bounds in parent y "+childNode.boundsInParent.y);
+                    console.log("height in  "+childNode.localBounds.height);
+                    PreviousChildYPosition= childNode.boundsInParent.y+childNode.localBounds.height;
+
+                    console.log(`PreviousChildYPosition`+ PreviousChildYPosition)
+
                 }
 
 

@@ -20,7 +20,7 @@ function isSymbol(node) {
           height:${num(bounds.height)},
           decoration: new BoxDecoration(
           image:new DecorationImage(
-                        image: NetworkImage("http://localhost:8899/image/${filename}"),fit: BoxFit.cover` + `),
+                        image: new AssetImage("assets/yoouma/${filename}"),fit: BoxFit.cover` + `)),
           child:` + css + ` new Container()` + `)`;
          return css;
         /**/
@@ -118,7 +118,7 @@ async function savePngOnTemp(node) {
     // Exit if user doesn't select a folder
     //  if (!folder) return console.log("User canceled folder picker.");
 
-    // console.log("folder" + folder);
+    console.log("folder" + folder);
     var filename = `${node.name}.png`.toLowerCase();
     console.log("***filename****" + filename);
     var myfile = await folder.createFile(filename, {overwrite: true});

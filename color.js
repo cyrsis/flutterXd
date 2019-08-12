@@ -139,6 +139,13 @@ function isColor(node) {
     } else {
         // css += `${fillName}: transparent;\n`; //background transparent
     }
+    if (node.stroke)
+    {
+        css += `color: Color(${colorToFlutter(node.stroke)}),\n`;
+
+    }
+
+    
     return css;
 }
 
