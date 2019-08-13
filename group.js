@@ -16,21 +16,28 @@ function isGroup(node) {
     if (node instanceof sg.Group) {
         // Print out types of all child nodes (if any)
 
-
         if (node.name.includes("Row")) {
 
             walkDownRowTree(node);
 
-            groupCss += `, 
-                    ),
+            groupCss += ` 
+                   
               )`;//groupCss
-
             return groupCss;
 
         }
 
+        else{
+            walkDownColumnTree(node);
+            groupCss += `, 
+                    ),
+              )`;//groupCss
+            return groupCss;
+        }
 
-        walkDownColumnTree(node);
+
+
+
 
         function walkDownColumnTree(node, command, value = null) {
             // command(node, value);
@@ -139,10 +146,7 @@ function isGroup(node) {
             });
 
             groupCss += `]`;
-            //Do not go for the second child
-            // node.children.forEach(childNode => {
-            //     walkDownTree(childNode, command, value);
-            // });
+
         }
 
         function walkDownRowTree(node, command, value = null) {
@@ -256,10 +260,7 @@ function isGroup(node) {
             groupCss += `]
       
       )`;
-            //Do not go for the second child
-            // node.children.forEach(childNode => {
-            //     walkDownTree(childNode, command, value);
-            // });
+
         }
 
 
