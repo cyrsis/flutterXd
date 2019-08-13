@@ -32,6 +32,7 @@ var recetangleWidget = require("./rectangle");
 var ellipse = require("./ellipse");
 var path = require('./path');
 var symbol = require('./symbol');
+var group = require('./group');
 
 
 function styleIsItalic(fontStyle) {
@@ -61,7 +62,7 @@ function copyflutter(selection) {
     var css = "";
     var containerCss = "";
     var childCss = "";
-    var groupCss = "";
+
     var node = selection.items[0];
     if (!node) {
         return;
@@ -83,107 +84,11 @@ function copyflutter(selection) {
     }
 
     if (node instanceof sg.Group) {
-        // Print out types of all child nodes (if any)
 
-        var element = node.children.toArray();
+        css += group.isGroup(node);
 
-        var reversed = element.reverse();
-
-
-
-        walkDownTree(node);
-
-        function walkDownTree(node, command, value = null) {
-            // command(node, value);
-
-            var bounds = node.localBounds;
-
-            var position = node.boundsInParent;
-
-            var  PreviousChildYPosition = 0;
-
-            console.log(position);
-            groupCss += "//";
-            groupCss += `${node.name}`
-            groupCss += "\n";
-            groupCss += `new Container(
-          width: ${num(bounds.width)},
-          height:${num(bounds.height)},
-          child: Column(
-        children: <Widget>[`;
-
-            node.children.forEach(function (childNode, index) {
-
-                console.log("Current Child " + index + " is a " + childNode.constructor.name);
-
-                console.log("Previous: " + ((0 === index)? "START" : node.children.at(index-1)));
-
-                console.log("Next: " + ((childNode.length - 1 === index)? "END" : node.children.at(index+1)));
-
-
-
-                if (childNode instanceof sg.Rectangle) {
-                    groupCss += recetangleWidget.isRectangle(childNode)
-                    groupCss += `)`
-                    ;
-                } else if (childNode instanceof sg.Text) {
-
-
-                    if (1 === index) {
-                        groupCss += `\nAppWidget.SizeBoxH`+childNode.boundsInParent.y+`,\n`;
-                    }
-                    else
-                    {
-
-                        groupCss += `\nAppWidget.SizeBoxH`+ (childNode.boundsInParent.y-PreviousChildYPosition)+`,\n`;
-
-                    }
-
-                    groupCss += textWidget.isText(childNode) + ', ';
-
-                    console.log("Bounds in parent y "+childNode.boundsInParent.y);
-                    console.log("height in  "+childNode.localBounds.height);
-                    PreviousChildYPosition= childNode.boundsInParent.y+childNode.localBounds.height;
-
-                    console.log(`PreviousChildYPosition`+ PreviousChildYPosition)
-
-                }
-
-
-            });
-
-            groupCss += `], 
-      ),
-      )`;
-            //Do not go for the second child
-            // node.children.forEach(childNode => {
-            //     walkDownTree(childNode, command, value);
-            // });
-        }
-
-        // reversed.forEach(function (childNode, i) {
-        //     console.log("Child " + i + " is a " + childNode.constructor.name);
-        //     if (childNode instanceof sg.Rectangle) {
-        //         groupCss += recetangleWidget.isRectangle(childNode)
-        //         groupCss += `)`
-        //         ;
-        //     } else if (childNode instanceof sg.Text) {
-        //         groupCss += textWidget.isText(childNode) + ', ';
-        //     }
-        //
-        //
-        // });
-
-        // css += groupCss + containerCss + childCss;
-
-
-        groupCss += `, 
-      ),
-      )`;//groupCss
-
-
-        clipboard.copyText(groupCss);
-        console.log(groupCss);
+        clipboard.copyText(css);
+        console.log(css);
 
         return;
     }
