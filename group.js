@@ -25,18 +25,13 @@ function isGroup(node) {
               )`;//groupCss
             return groupCss;
 
-        }
-
-        else{
+        } else {
             walkDownColumnTree(node);
             groupCss += `, 
                     ),
               )`;//groupCss
             return groupCss;
         }
-
-
-
 
 
         function walkDownColumnTree(node, command, value = null) {
@@ -95,13 +90,12 @@ function isGroup(node) {
                     groupCss += recetangleWidget.isRectangle(childNode)
                     groupCss += `)`
                     ;
-                }
-                else if (childNode instanceof sg.Text) {
+                } else if (childNode instanceof sg.Text) {
 
 
                     if (0 === index) {
 
-                        if ((Math.abs(childNode.boundsInParent.y) - Math.abs(PreviousChildYPosition))!=0) {
+                        if ((Math.abs(childNode.boundsInParent.y) - Math.abs(PreviousChildYPosition)) != 0) {
                             groupCss += `\nAppWidget.SizeBoxH` + (Math.abs(childNode.boundsInParent.y) - Math.abs(PreviousChildYPosition)) + `,\n`;
                         }
 
@@ -114,7 +108,6 @@ function isGroup(node) {
                     groupCss += textWidget.isText(childNode) + ', ';
 
 
-
                     console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
                     console.log("Bounds in parent y " + childNode.boundsInParent.y);
                     console.log("height in  " + childNode.localBounds.height);
@@ -122,8 +115,7 @@ function isGroup(node) {
                     console.log(`PreviousChildYPosition` + PreviousChildYPosition)
                     console.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 
-                }
-                else if (childNode instanceof sg.Group) {
+                } else if (childNode instanceof sg.Group) {
 
                     if (parseInt(childNode.boundsInParent.y - PreviousChildYPosition) != 0) {
 
@@ -265,8 +257,6 @@ function isGroup(node) {
 
 
         groupCss += ` )`;//groupCss
-
-
 
 
         return groupCss;
